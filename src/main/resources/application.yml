@@ -1,0 +1,5 @@
+spring:
+  application:
+    name: spring-auth
+jwt:
+  signerKey: "x1vz16s6nckz331p8xk3910o1q5yoes3"
