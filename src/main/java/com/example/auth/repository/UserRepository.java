@@ -1,9 +1,7 @@
 package com.example.auth.repository;
 
-import com.example.auth.dto.response.User;
-import com.example.auth.entity.InvalidatedToken;
+import com.example.auth.entity.User;
 import jakarta.annotation.PostConstruct;
-import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Repository;
 
 import java.time.LocalDate;

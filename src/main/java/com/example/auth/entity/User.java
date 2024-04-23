@@ -1,4 +1,4 @@
-package com.example.auth.dto.response;
+package com.example.auth.entity;
 
 import lombok.*;
 import lombok.experimental.FieldDefaults;

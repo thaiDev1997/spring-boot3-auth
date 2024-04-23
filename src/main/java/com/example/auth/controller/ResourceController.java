@@ -1,6 +1,6 @@
 package com.example.auth.controller;
 
-import com.example.auth.dto.response.User;
+import com.example.auth.entity.User;
 import com.example.auth.service.UserService;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
