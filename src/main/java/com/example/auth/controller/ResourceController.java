@@ -2,9 +2,11 @@ package com.example.auth.controller;
 
 import com.example.auth.entity.User;
 import com.example.auth.service.UserService;
+import jakarta.validation.Valid;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.MediaType;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.oauth2.jwt.Jwt;
@@ -13,6 +15,7 @@ import org.springframework.web.bind.annotation.*;
 import java.util.Collection;
 import java.util.Map;
 
+@Slf4j
 @RestController
 @RequestMapping(value = "/resource")
 @FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
@@ -37,7 +40,8 @@ public class ResourceController {
     }
 
     @PostMapping(value = "/users", produces = MediaType.APPLICATION_JSON_VALUE)
-    public User createUser(@RequestBody User newUser) {
+    public User createUser(@RequestBody @Valid User newUser) {
+        log.info("Controller: create user");
         return userService.create(newUser);
     }
 

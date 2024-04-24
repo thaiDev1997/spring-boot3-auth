@@ -3,8 +3,13 @@ package com.example.auth.exception;
 import com.example.auth.dto.response.ApiResponse;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.AccessDeniedException;
+import org.springframework.validation.FieldError;
+import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
+
+import java.util.HashMap;
+import java.util.Map;
 
 @ControllerAdvice
 public class GlobalExceptionHandler {
@@ -30,5 +35,19 @@ public class GlobalExceptionHandler {
         return ResponseEntity
                 .status(errorCode.getStatusCode())
                 .body(new ApiResponse(errorCode.getCode(), errorCode.getMessage(), null));
+    }
+
+    @ExceptionHandler(value = MethodArgumentNotValidException.class)
+    ResponseEntity<ApiResponse> handlingMethodArgumentNotValidException(MethodArgumentNotValidException exception){
+        ErrorCode errorCode = ErrorCode.INVALID_REQUEST;
+        Map<String, Object> fieldErrorMap = new HashMap<>();
+        for (FieldError fieldError : exception.getFieldErrors()) {
+            fieldErrorMap.put(fieldError.getField(), fieldError.getRejectedValue());
+        }
+        FieldError fieldError = exception.getFieldError();
+        return ResponseEntity
+                .status(errorCode.getStatusCode())
+                .body(new ApiResponse(errorCode.getCode(), String.format("%s: %s", fieldError.getField(), fieldError.getDefaultMessage()),
+                        fieldErrorMap));
     }
 }

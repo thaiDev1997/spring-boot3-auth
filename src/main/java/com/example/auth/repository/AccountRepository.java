@@ -22,7 +22,8 @@ public class AccountRepository {
         accountMap = new HashMap<>();
         String hashedPassword = "$2a$12$QQxWOB5gRAxgztfPO2b4Tur0IdufpL.WXlq.jModkrckYQsNsar/K";
         accountMap.put("admin", new Account("admin", hashedPassword,
-                new Role[]{Role.ADMIN, Role.USER}, new Permission[]{Permission.GET_ALL_USERS, Permission.GET_USER, Permission.DELETE_USER}));
+                new Role[]{Role.ADMIN, Role.USER}, new Permission[]{Permission.GET_ALL_USERS, Permission.GET_USER,
+                Permission.CREATE_USER, Permission.DELETE_USER}));
         accountMap.put("user", new Account("user", hashedPassword,
                 new Role[]{Role.USER}, new Permission[]{Permission.GET_USER}));
     }

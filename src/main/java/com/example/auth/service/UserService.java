@@ -5,11 +5,13 @@ import com.example.auth.repository.UserRepository;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Service;
 
 import java.util.Collection;
 
+@Slf4j
 @RequiredArgsConstructor
 @FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
 @Service
@@ -29,6 +31,7 @@ public class UserService {
 
     @PreAuthorize(value = "hasAuthority('CREATE_USER')") // Permission: CREATE_USER
     public User create(User user) {
+        log.info("UserService#create");
         return userRepository.create(user);
     }
 
