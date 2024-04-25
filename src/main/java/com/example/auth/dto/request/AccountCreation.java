@@ -1,5 +1,9 @@
-package com.example.auth.entity;
+package com.example.auth.dto.request;
 
+import com.example.auth.enums.Permission;
+import com.example.auth.enums.Role;
+import jakarta.validation.constraints.Min;
+import jakarta.validation.constraints.Size;
 import lombok.AccessLevel;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -10,16 +14,15 @@ import lombok.experimental.FieldDefaults;
 
 import java.time.LocalDate;
 
-@Builder
 @Getter
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
+@Builder
 @FieldDefaults(level = AccessLevel.PRIVATE)
-public class User {
-
-    String code;
-    String name;
-    int age;
-    LocalDate dateOfBirth;
+public class AccountCreation {
+    String username;
+    String password;
+    Role[] roles;
+    Permission[] permissions;
 }

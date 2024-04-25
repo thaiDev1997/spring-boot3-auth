@@ -51,7 +51,6 @@ public class SecurityConfig {
         httpSecurity.authorizeHttpRequests(request -> {
             request.requestMatchers(HttpMethod.POST, "/auth/login").permitAll()
                     .requestMatchers(HttpMethod.POST, "/auth/user-details-service/login").permitAll()
-                    .requestMatchers("/resource/**").hasRole(Role.USER.name())
                     .anyRequest().authenticated();
         });
         return httpSecurity.userDetailsService(userDetailsService)

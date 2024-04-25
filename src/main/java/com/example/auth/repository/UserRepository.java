@@ -1,29 +1,15 @@
 package com.example.auth.repository;
 
 import com.example.auth.entity.User;
-import jakarta.annotation.PostConstruct;
 import org.springframework.stereotype.Repository;
 
-import java.time.LocalDate;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.UUID;
 
 @Repository
 public class UserRepository {
-    private Map<String, User> userMap;
-
-    @PostConstruct
-    public void init() {
-        userMap = new HashMap<>();
-
-        for (short i = 0; i < 100; i++) {
-            String code = UUID.randomUUID().toString();
-            int age = (int) (Math.random() * (50 - 18) + 18);
-            userMap.put(code, new User(code, "John Doe " + i, age, LocalDate.now()));
-        }
-    }
+    private Map<String, User> userMap = new HashMap<>();
 
     public Collection<User> getAll() {
         return userMap.values();
@@ -34,7 +20,6 @@ public class UserRepository {
     }
 
     public User create(User user) {
-        user.setCode(UUID.randomUUID().toString());
         userMap.put(user.getCode(), user);
         return user;
     }
