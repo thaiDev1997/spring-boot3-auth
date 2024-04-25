@@ -3,7 +3,6 @@ package com.example.auth.configuration;
 import com.example.auth.dto.response.ApiResponse;
 import com.example.auth.exception.ErrorCode;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import org.springframework.http.MediaType;

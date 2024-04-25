@@ -1,10 +1,11 @@
 package com.example.auth.service;
 
 import com.example.auth.dto.request.AccountCreation;
-import com.example.auth.dto.request.AuthenticationRequest;
 import com.example.auth.entity.Account;
 import com.example.auth.enums.Permission;
 import com.example.auth.enums.Role;
+import com.example.auth.exception.ErrorCode;
+import com.example.auth.exception.ResponseException;
 import com.example.auth.repository.AccountRepository;
 import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
@@ -12,15 +13,14 @@ import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.security.oauth2.core.OAuth2AccessToken;
+import org.springframework.boot.test.mock.mockito.MockBean;
 
-import java.util.Arrays;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 
 @SpringBootTest
 public class AccountServiceTest {
-    @Autowired
-    private AuthenticationService authenticationService;
-    @Autowired
+
+    @MockBean // should be @MockBean instead of @Autowired
     private AccountRepository accountRepository;
 
     @Autowired
@@ -28,7 +28,6 @@ public class AccountServiceTest {
 
     private AccountCreation accountRequest;
     private Account accountResponse;
-    private String token;
 
     @BeforeEach
     public void init() {
@@ -43,18 +42,15 @@ public class AccountServiceTest {
                 .roles(accountRequest.getRoles())
                 .permissions(accountRequest.getPermissions())
                 .build();;
-        token = OAuth2AccessToken.TokenType.BEARER.getValue() + " " + authenticationService.authenticate(AuthenticationRequest.builder()
-                .username("admin")
-                .password("test123")
-                .build());
     }
 
     /* Do bên trong AccountService#create có:
      + accountMapper -> thành phần stateless (INPUT thế nào thì OUTPUT thế ấy) => ko MockObject
-     + accountRepository[existsByUsername - create] -> thành phần stateful (khi .save() có thể lưu dữ liệu test xuống Database) => phải MockObject
+     + accountRepository[existsByUsername - create] -> thành phần stateful, vì khi .save() có thể
+        lưu dữ liệu test xuống Database) => phải MockObject bằng @MockBean
     */
     @Test
-    void createAccountAccount_validRequest_success() {
+    void createAccount_validRequest_success() {
         // GIVEN (preparation)
         Mockito.when(accountRepository.existsByUsername(Mockito.anyString())).thenReturn(false);
         Mockito.when(accountRepository.create(Mockito.any())).thenReturn(accountResponse);
@@ -63,8 +59,18 @@ public class AccountServiceTest {
         var response = accountService.createAccount(accountRequest);
 
         // THEN (expectation after execution)
-        Assertions.assertThat(response.getUsername().equals(accountResponse.getUsername()));
-        Assertions.assertThat(Arrays.equals(response.getRoles(), accountResponse.getRoles()));
+        Assertions.assertThat(response.getUsername()).isEqualTo(accountResponse.getUsername());
+        Assertions.assertThat(response.getRoles()).isEqualTo(accountResponse.getRoles());
+        Assertions.assertThat(response.getUsername()).isEqualTo("john");
     }
 
+    @Test
+    void createAccount_accountExisted_fail() {
+        // GIVEN (preparation)
+        Mockito.when(accountRepository.existsByUsername(Mockito.anyString())).thenReturn(true);
+
+        // WHEN (execution on preparation)
+        var exception = assertThrows(ResponseException.class, () -> accountService.createAccount(accountRequest));
+        Assertions.assertThat(exception.getErrorCode()).isEqualTo(ErrorCode.ACCOUNT_EXISTED);
+    }
 }

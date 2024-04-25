@@ -1,6 +1,5 @@
 package com.example.auth.configuration;
 
-import com.example.auth.enums.Role;
 import com.example.auth.service.UserDetailsServiceImpl;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;

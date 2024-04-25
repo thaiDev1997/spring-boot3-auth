@@ -47,7 +47,6 @@ public class UserService {
 
     @PreAuthorize(value = "hasAuthority('CREATE_USER')") // Permission: CREATE_USER
     public User create(UserCreation newUser) {
-        log.info("UserService#create");
         User user = userMapper.toUser(newUser);
         user.setCode(UUID.randomUUID().toString());
         return userRepository.create(user);
