@@ -12,6 +12,8 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 import lombok.experimental.FieldDefaults;
 
+import java.util.Set;
+
 @Getter
 @Setter
 @NoArgsConstructor
@@ -21,6 +23,5 @@ import lombok.experimental.FieldDefaults;
 public class AccountCreation {
     String username;
     String password;
-    Role[] roles;
-    Permission[] permissions;
+    Set<String> roles;
 }

@@ -4,8 +4,8 @@ import com.example.auth.dto.auth.AuthUser;
 import com.example.auth.dto.request.AuthenticationRequest;
 import com.example.auth.entity.Account;
 import com.example.auth.entity.InvalidatedToken;
-import com.example.auth.enums.Permission;
-import com.example.auth.enums.Role;
+import com.example.auth.entity.Permission;
+import com.example.auth.entity.Role;
 import com.example.auth.exception.ErrorCode;
 import com.example.auth.exception.ResponseException;
 import com.example.auth.repository.AccountRepository;
@@ -20,7 +20,6 @@ import com.nimbusds.jose.crypto.MACSigner;
 import com.nimbusds.jose.crypto.MACVerifier;
 import com.nimbusds.jwt.JWTClaimsSet;
 import com.nimbusds.jwt.SignedJWT;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.security.authentication.AuthenticationManager;
@@ -34,10 +33,10 @@ import org.springframework.stereotype.Service;
 import java.text.ParseException;
 import java.time.Instant;
 import java.time.temporal.ChronoUnit;
-import java.util.Date;
-import java.util.Objects;
-import java.util.StringJoiner;
-import java.util.UUID;
+import java.util.*;
+
+import static com.example.auth.enums.Permission.*;
+import static com.example.auth.enums.Role.ADMIN;
 
 @Service
 public class AuthenticationService {
@@ -59,10 +58,11 @@ public class AuthenticationService {
 
     public String authenticate(AuthenticationRequest authenticationRequest) {
         String username = authenticationRequest.getUsername();
-        Account account = accountRepository.get(username);
-        if (Objects.isNull(account)) {
+        Optional<Account> accountOptional = accountRepository.findByUsername(username);
+        if (accountOptional.isEmpty()) {
             throw new ResponseException(ErrorCode.USER_NOT_EXISTED);
         }
+        Account account = accountOptional.get();
         if (!passwordEncoder.matches(authenticationRequest.getPassword(), account.getEncodedPassword())) {
             throw new ResponseException(ErrorCode.INVALID_PASSWORD);
         }
@@ -84,9 +84,12 @@ public class AuthenticationService {
         // JWT Header
         JWSHeader header = new JWSHeader(JWSAlgorithm.HS256);
 
-        Role[] roles = account.getRoles();
+        Set<Role> roles = account.getRoles();
         // Role[] roles = new Role[]{Role.USER, Role.ADMIN};
-        Permission[] permissions = account.getPermissions();
+        Set<Permission> permissions = new HashSet<>();
+        for (Role role : roles) {
+            permissions.addAll(role.getPermissions());
+        }
         // JTW Payload
         JWTClaimsSet jwtClaimsSet = new JWTClaimsSet.Builder()
                 .subject(username)
@@ -107,14 +110,28 @@ public class AuthenticationService {
         return jwsObject.serialize();
     }
 
-    private String buildUserScopes(Role[] roles, Permission[] permissions) {
+    public String generateAdminTokenTestScope() {
+        Role adminRole = Role.builder().name(ADMIN.name()).description("Administrator").build();
+        // Permissions
+        Permission getAllUsers = Permission.builder().name(GET_ALL_USERS.name()).build();
+        Permission getUser = Permission.builder().name(GET_USER.name()).build();
+        Permission createUser = Permission.builder().name(CREATE_USER.name()).build();
+        Permission editUser = Permission.builder().name(EDIT_USER.name()).build();
+        Permission deleteUser = Permission.builder().name(DELETE_USER.name()).build();
+
+        Set<Permission> allPermissions = Set.of(getAllUsers, getUser, createUser, editUser, deleteUser);
+        adminRole.setPermissions(allPermissions);
+        return generateToken(Account.builder().username("admin").roles(Set.of(adminRole)).build());
+    }
+
+    private String buildUserScopes(Set<Role> roles, Set<Permission> permissions) {
         final String spaceDelimiter = " ";
         StringJoiner scopeJoiner = new StringJoiner(spaceDelimiter);
         for (Role role : roles) {
-            scopeJoiner.add("ROLE_" + role.name());
+            scopeJoiner.add("ROLE_" + role.getName());
         }
         for (Permission permission : permissions) {
-            scopeJoiner.add(permission.name());
+            scopeJoiner.add(permission.getName());
         }
         return scopeJoiner.toString();
     }
@@ -125,7 +142,7 @@ public class AuthenticationService {
             SignedJWT signedJWT = SignedJWT.parse(token);
             var verified = signedJWT.verify(verifier);
             return verified && signedJWT.getJWTClaimsSet().getExpirationTime().after(new Date())
-                    && !invalidatedTokenRepository.existById(signedJWT.getJWTClaimsSet().getJWTID());
+                    && !invalidatedTokenRepository.existsById(signedJWT.getJWTClaimsSet().getJWTID());
         } catch (RuntimeException | JOSEException | ParseException e) {
             return false;
         }
@@ -141,7 +158,7 @@ public class AuthenticationService {
 
     public String refreshToken(Jwt jwt) {
         String username = jwt.getSubject();
-        Account account = accountRepository.get(username);
+        Account account = accountRepository.getReferenceById(username);
         String newToken = generateToken(account);
         logout(jwt);
         return newToken;

@@ -1,5 +1,21 @@
+server:
+  port: 8080
 spring:
   application:
     name: spring-auth
+  datasource:
+    # docker run -d -p 5433:5432 --name auth-db -e POSTGRES_USER=postgres -e POSTGRES_PASSWORD=postgres -e POSTGRES_DB=auth_db postgres
+    driver-class-name: org.postgresql.Driver
+    url: jdbc:postgresql://localhost:5433/auth_db?currentSchema=public
+    username: postgres
+    password: postgres
+  jpa:
+    hibernate:
+      ddl-auto: update
+    show-sql: true
+
 jwt:
   signerKey: "x1vz16s6nckz331p8xk3910o1q5yoes3"
+
+
+

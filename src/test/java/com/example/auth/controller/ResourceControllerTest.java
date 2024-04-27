@@ -60,10 +60,7 @@ public class ResourceControllerTest {
                 .age(age)
                 .dateOfBirth(dob)
                 .build();
-        token = OAuth2AccessToken.TokenType.BEARER.getValue() + " " + authenticationService.authenticate(AuthenticationRequest.builder()
-                .username("admin")
-                .password("test123")
-                .build());
+        token = OAuth2AccessToken.TokenType.BEARER.getValue() + " " + authenticationService.generateAdminTokenTestScope();
     }
 
     @Test

@@ -1,10 +1,10 @@
+
 package com.example.auth.repository;
 
-import com.example.auth.entity.User;
+import com.example.auth.entity.Permission;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 
 @Repository
-public interface UserRepository extends JpaRepository<User, String> {
-    
+public interface PermissionRepository extends JpaRepository<Permission, String> {
 }

@@ -1,5 +1,6 @@
 package com.example.auth.entity;
 
+import jakarta.persistence.*;
 import lombok.AccessLevel;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -16,8 +17,12 @@ import java.time.LocalDate;
 @NoArgsConstructor
 @AllArgsConstructor
 @FieldDefaults(level = AccessLevel.PRIVATE)
+@Entity
+@Table(name = "\"user\"")
 public class User {
 
+    @Id
+    @GeneratedValue(strategy = GenerationType.UUID)
     String code;
     String name;
     int age;

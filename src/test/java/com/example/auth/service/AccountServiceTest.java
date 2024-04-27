@@ -2,8 +2,7 @@ package com.example.auth.service;
 
 import com.example.auth.dto.request.AccountCreation;
 import com.example.auth.entity.Account;
-import com.example.auth.enums.Permission;
-import com.example.auth.enums.Role;
+import com.example.auth.entity.Role;
 import com.example.auth.exception.ErrorCode;
 import com.example.auth.exception.ResponseException;
 import com.example.auth.repository.AccountRepository;
@@ -15,7 +14,10 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 
+import java.util.Set;
+
 import static org.junit.jupiter.api.Assertions.assertThrows;
+import static com.example.auth.enums.Role.ADMIN;
 
 @SpringBootTest
 public class AccountServiceTest {
@@ -34,13 +36,12 @@ public class AccountServiceTest {
         accountRequest = AccountCreation.builder()
                 .username("john")
                 .password("test123")
-                .roles(new Role[]{Role.ADMIN})
-                .permissions(new Permission[]{Permission.GET_ALL_USERS, Permission.GET_USER, Permission.CREATE_USER, Permission.DELETE_USER})
+                .roles(Set.of(ADMIN.name()))
                 .build();
+        Role role = Role.builder().name(ADMIN.name()).build();
         accountResponse = Account.builder()
                 .username(accountRequest.getUsername()) // omit encoded_password field
-                .roles(accountRequest.getRoles())
-                .permissions(accountRequest.getPermissions())
+                .roles(Set.of(role))
                 .build();;
     }
 
@@ -53,7 +54,7 @@ public class AccountServiceTest {
     void createAccount_validRequest_success() {
         // GIVEN (preparation)
         Mockito.when(accountRepository.existsByUsername(Mockito.anyString())).thenReturn(false);
-        Mockito.when(accountRepository.create(Mockito.any())).thenReturn(accountResponse);
+        Mockito.when(accountRepository.save(Mockito.any())).thenReturn(accountResponse);
 
         // WHEN (execution on preparation)
         var response = accountService.createAccount(accountRequest);

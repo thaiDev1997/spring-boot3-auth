@@ -7,7 +7,7 @@ import org.springframework.http.HttpStatusCode;
 @Getter
 public enum ErrorCode {
     INTERNAL_SERVER(0, "Internal error", HttpStatus.INTERNAL_SERVER_ERROR),
-    INVALID_PASSWORD(1, "Password must be at least {min} characters", HttpStatus.BAD_REQUEST),
+    INVALID_PASSWORD(1, "Invalid password", HttpStatus.BAD_REQUEST),
     USER_NOT_EXISTED(2, "User not existed", HttpStatus.NOT_FOUND),
     UNAUTHENTICATED(3, "Unauthenticated", HttpStatus.UNAUTHORIZED),
     INVALID_ROLE_PERMISSION(4, "Invalid Role Permission", HttpStatus.FORBIDDEN),
