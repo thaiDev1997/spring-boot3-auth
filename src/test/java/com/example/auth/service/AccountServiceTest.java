@@ -6,6 +6,7 @@ import com.example.auth.entity.Role;
 import com.example.auth.exception.ErrorCode;
 import com.example.auth.exception.ResponseException;
 import com.example.auth.repository.AccountRepository;
+import com.example.auth.repository.RoleRepository;
 import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -13,17 +14,23 @@ import org.mockito.Mockito;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.test.context.TestPropertySource;
 
+import java.util.Collections;
 import java.util.Set;
 
-import static org.junit.jupiter.api.Assertions.assertThrows;
 import static com.example.auth.enums.Role.ADMIN;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 
 @SpringBootTest
+@TestPropertySource(value = "/test.properties")
 public class AccountServiceTest {
 
     @MockBean // should be @MockBean instead of @Autowired
     private AccountRepository accountRepository;
+
+    @MockBean // should be @MockBean instead of @Autowired
+    private RoleRepository roleRepository;
 
     @Autowired
     private AccountService accountService;
@@ -42,7 +49,8 @@ public class AccountServiceTest {
         accountResponse = Account.builder()
                 .username(accountRequest.getUsername()) // omit encoded_password field
                 .roles(Set.of(role))
-                .build();;
+                .build();
+        ;
     }
 
     /* Do bên trong AccountService#create có:
@@ -54,6 +62,7 @@ public class AccountServiceTest {
     void createAccount_validRequest_success() {
         // GIVEN (preparation)
         Mockito.when(accountRepository.existsByUsername(Mockito.anyString())).thenReturn(false);
+        Mockito.when(roleRepository.getRolesByNames(Mockito.anySet())).thenReturn(Collections.EMPTY_SET);
         Mockito.when(accountRepository.save(Mockito.any())).thenReturn(accountResponse);
 
         // WHEN (execution on preparation)

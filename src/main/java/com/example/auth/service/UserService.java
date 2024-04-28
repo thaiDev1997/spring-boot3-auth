@@ -9,6 +9,7 @@ import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Service;
 
@@ -19,19 +20,24 @@ import java.util.UUID;
 
 @Slf4j
 @RequiredArgsConstructor
-@FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
+@FieldDefaults(level = AccessLevel.PRIVATE)
 @Service
 public class UserService {
+    @Value("${spring.datasource.driver-class-name}")
+    private String datasourceDriverClassName;
 
-    UserRepository userRepository;
-    UserMapper userMapper;
+    final UserRepository userRepository;
+    final UserMapper userMapper;
+
 
     @PostConstruct
     public void init() {
-        userRepository.deleteAll();
-        for (short i = 0; i < 50; i++) {
-            int age = (int) (Math.random() * (50 - 18) + 18);
-            this.create(UserCreation.builder().name("John Doe " + i).age(age).dateOfBirth(LocalDate.now()).build());
+        if ("org.postgresql.Driver".equals(datasourceDriverClassName)) {
+            userRepository.deleteAll();
+            for (short i = 0; i < 50; i++) {
+                int age = (int) (Math.random() * (50 - 18) + 18);
+                this.create(UserCreation.builder().name("John Doe " + i).age(age).dateOfBirth(LocalDate.now()).build());
+            }
         }
     }
 

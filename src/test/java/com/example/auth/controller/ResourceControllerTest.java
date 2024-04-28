@@ -1,13 +1,15 @@
 package com.example.auth.controller;
 
-import com.example.auth.dto.request.AuthenticationRequest;
 import com.example.auth.dto.request.UserCreation;
 import com.example.auth.entity.User;
 import com.example.auth.exception.ErrorCode;
+import com.example.auth.repository.InvalidatedTokenRepository;
 import com.example.auth.service.AuthenticationService;
 import com.example.auth.service.UserService;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
+import lombok.AccessLevel;
+import lombok.experimental.FieldDefaults;
 import lombok.extern.slf4j.Slf4j;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -20,6 +22,7 @@ import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
 import org.springframework.security.oauth2.core.OAuth2AccessToken;
+import org.springframework.test.context.TestPropertySource;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers;
@@ -30,20 +33,25 @@ import java.util.UUID;
 @Slf4j
 @SpringBootTest
 @AutoConfigureMockMvc
+@TestPropertySource("/test.properties")
+@FieldDefaults(level = AccessLevel.PRIVATE)
 public class ResourceControllerTest {
 
     @Autowired
-    private MockMvc mockMvc;
+    MockMvc mockMvc;
 
     @Autowired
-    private AuthenticationService authenticationService;
+    AuthenticationService authenticationService;
 
     @MockBean
-    private UserService userService;
+    UserService userService;
 
-    private UserCreation userRequest;
-    private User userResponse;
-    private String token;
+    @MockBean
+    InvalidatedTokenRepository invalidatedTokenRepository;
+
+    UserCreation userRequest;
+    User userResponse;
+    String token;
 
     @BeforeEach
     public void init() {
@@ -70,13 +78,14 @@ public class ResourceControllerTest {
         objectMapper.registerModule(new JavaTimeModule());
         String content = objectMapper.writeValueAsString(userRequest);
         // WHEN (execution on preparation)
+        Mockito.when(invalidatedTokenRepository.existsById(Mockito.anyString())).thenReturn(false);
         Mockito.when(userService.create(ArgumentMatchers.any())).thenReturn(userResponse);
 
         mockMvc.perform(MockMvcRequestBuilders
-                .post("/users")
-                .contentType(MediaType.APPLICATION_JSON_VALUE)
-                .header(HttpHeaders.AUTHORIZATION, token)
-                .content(content))
+                        .post("/users")
+                        .contentType(MediaType.APPLICATION_JSON_VALUE)
+                        .header(HttpHeaders.AUTHORIZATION, token)
+                        .content(content))
                 // THEN (expectation after execution)
                 .andExpect(MockMvcResultMatchers.status().isOk())
                 // jsonPath -> result.id or response.data, ...
@@ -95,6 +104,7 @@ public class ResourceControllerTest {
         objectMapper.registerModule(new JavaTimeModule());
         String content = objectMapper.writeValueAsString(userRequest);
         // WHEN
+        Mockito.when(invalidatedTokenRepository.existsById(Mockito.anyString())).thenReturn(false);
         Mockito.when(userService.create(ArgumentMatchers.any())).thenReturn(userResponse);
 
         mockMvc.perform(MockMvcRequestBuilders
