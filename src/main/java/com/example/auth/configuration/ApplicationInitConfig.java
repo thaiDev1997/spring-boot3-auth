@@ -17,13 +17,12 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
 import java.util.Collection;
-import java.util.Collections;
 import java.util.List;
 import java.util.Set;
 
+import static com.example.auth.enums.Permission.*;
 import static com.example.auth.enums.Role.ADMIN;
 import static com.example.auth.enums.Role.USER;
-import static com.example.auth.enums.Permission.*;
 
 @Slf4j
 @Configuration
@@ -64,7 +63,13 @@ public class ApplicationInitConfig {
             try {
                 accountService.createAccount(AccountCreation.builder().username("admin").password(rawPassword).roles(Set.of(ADMIN.name())).build());
                 accountService.createAccount(AccountCreation.builder().username("user").password(rawPassword).roles(Set.of(USER.name())).build());
-            } catch (ResponseException ignoredException) {}
+            } catch (ResponseException ignoredException) {
+            }
         };
+    }
+
+    @Bean
+    CustomBeanPostProcessor customBeanPostProcessor() {
+        return new CustomBeanPostProcessor();
     }
 }
