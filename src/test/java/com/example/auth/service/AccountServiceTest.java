@@ -14,9 +14,11 @@ import org.mockito.Mockito;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.context.TestPropertySource;
 
 import java.util.Collections;
+import java.util.Optional;
 import java.util.Set;
 
 import static com.example.auth.enums.Role.ADMIN;
@@ -82,5 +84,13 @@ public class AccountServiceTest {
         // WHEN (execution on preparation)
         var exception = assertThrows(ResponseException.class, () -> accountService.createAccount(accountRequest));
         Assertions.assertThat(exception.getErrorCode()).isEqualTo(ErrorCode.ACCOUNT_EXISTED);
+    }
+
+    @Test
+    @WithMockUser(username = "john") // Mock for SecurityContextHolder.getAuthentication()
+    void getMyInfo_valid_success() {
+        Mockito.when(accountRepository.findByUsername(Mockito.any())).thenReturn(Optional.of(accountResponse));
+        var response = accountService.getMyInfo();
+        Assertions.assertThat(response.getUsername()).isEqualTo(accountResponse.getUsername());
     }
 }

@@ -18,4 +18,5 @@ jwt:
   signerKey: "x1vz16s6nckz331p8xk3910o1q5yoes3"
 
 
-
+#./gradlew build  => build project
+#./gradlew jacocoTestReport => generate JaCoCo test report ($buildDir/reports/jacoco/test)
