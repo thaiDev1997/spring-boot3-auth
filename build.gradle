@@ -53,9 +53,23 @@ dependencies {
 
 test {
 	finalizedBy jacocoTestReport // report is always generated after tests run
+	jacoco {
+		excludes += ["com/example/auth/dto/**"]
+	}
 }
 jacocoTestReport {
 	dependsOn test // tests are required to run before generating the report
+	afterEvaluate {
+		classDirectories.setFrom(files(classDirectories.files.collect {
+			fileTree(dir: it, exclude: [
+					'com/example/auth/dto/**',
+					'com/example/auth/mapper/**',
+					'com/example/auth/entity/**',
+					'com/example/auth/configuration/**',
+					'com/example/auth/enums/**'
+			])
+		}))
+	}
 }
 
 jacoco {

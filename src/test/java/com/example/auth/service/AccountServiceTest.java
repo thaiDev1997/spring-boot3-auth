@@ -89,8 +89,20 @@ public class AccountServiceTest {
     @Test
     @WithMockUser(username = "john") // Mock for SecurityContextHolder.getAuthentication()
     void getMyInfo_valid_success() {
-        Mockito.when(accountRepository.findByUsername(Mockito.any())).thenReturn(Optional.of(accountResponse));
+        Mockito.when(accountRepository.findByUsername(Mockito.anyString()))
+                .thenReturn(Optional.of(accountResponse));
         var response = accountService.getMyInfo();
-        Assertions.assertThat(response.getUsername()).isEqualTo(accountResponse.getUsername());
+        Assertions.assertThat(response.getUsername())
+                .isEqualTo(accountResponse.getUsername());
+    }
+
+    @Test
+    @WithMockUser(username = "john")
+    void getMyInfo_userNotFound_error() {
+        Mockito.when(accountRepository.findByUsername(Mockito.anyString()))
+                .thenReturn(Optional.empty());
+        var response = assertThrows(ResponseException.class, () -> accountService.getMyInfo());
+        Assertions.assertThat(response.getErrorCode())
+                .isEqualTo(ErrorCode.USER_NOT_EXISTED);
     }
 }
