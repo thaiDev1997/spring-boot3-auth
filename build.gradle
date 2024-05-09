@@ -3,6 +3,8 @@ plugins {
 	id 'org.springframework.boot' version '3.2.5'
 	id 'io.spring.dependency-management' version '1.1.4'
 	id 'jacoco'
+	// Spotless
+	id 'com.diffplug.spotless' version '6.25.0'
 }
 
 group = 'com.example.auth'
@@ -16,6 +18,8 @@ ext {
 	mapstructVersion = "1.5.5.Final"
 	lombokMapstructBindingVersion = "0.2.0"
 	springBootVersion = "3.2.5"
+	spotlessLibVersion = "2.43.0"
+	spotlessVersion = "6.25.0"
 }
 
 configurations {
@@ -45,12 +49,17 @@ dependencies {
 	annotationProcessor "org.mapstruct:mapstruct-processor:${mapstructVersion}"
 	annotationProcessor "org.projectlombok:lombok-mapstruct-binding:${lombokMapstructBindingVersion}"
 	/* MapStruct -- end */
+	// spotless start
+	implementation("com.diffplug.spotless:spotless-lib:${spotlessLibVersion}")
+	implementation("com.diffplug.spotless:spotless-plugin-gradle:${spotlessVersion}")
+	// spotless end
 
 	testImplementation 'org.springframework.boot:spring-boot-starter-test'
 	testImplementation 'com.h2database:h2'
 	testImplementation 'org.springframework.security:spring-security-test'
 }
 
+/* JaCoCO Configuration */
 test {
 	finalizedBy jacocoTestReport // report is always generated after tests run
 	jacoco {
@@ -77,10 +86,6 @@ jacoco {
 	// reportsDirectory = layout.buildDirectory.dir('customJacocoReportDir')
 }
 
-tasks.named('test') {
-	useJUnitPlatform()
-}
-
 jacocoTestCoverageVerification {
 	violationRules {
 		rule {
@@ -89,4 +94,23 @@ jacocoTestCoverageVerification {
 			}
 		}
 	}
+}
+
+/* Spotless Configuration => .\gradlew clean build spotlessApply */
+spotless {
+	java {
+		target fileTree('.') {
+			include '**/*.java'
+			exclude '**/build/**', '**/build-*/**'
+		}
+		toggleOffOn()
+		googleJavaFormat()
+		removeUnusedImports()
+		trimTrailingWhitespace()
+		endWithNewline()
+	}
+}
+
+tasks.named('test') {
+	useJUnitPlatform()
 }

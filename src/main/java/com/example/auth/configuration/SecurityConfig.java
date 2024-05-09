@@ -26,58 +26,67 @@ import org.springframework.security.web.SecurityFilterChain;
 @EnableMethodSecurity
 public class SecurityConfig {
 
-    @Lazy
-    @Autowired
-    private CustomJwtDecoder customJwtDecoder;
+  @Lazy @Autowired private CustomJwtDecoder customJwtDecoder;
 
-    @Autowired
-    private UserDetailsServiceImpl userDetailsService;
+  @Autowired private UserDetailsServiceImpl userDetailsService;
 
-    @Bean
-    public SecurityFilterChain filterChain(HttpSecurity httpSecurity) throws Exception {
-        httpSecurity.oauth2ResourceServer(oauth2 -> {
-            oauth2.jwt(jwtConfigurer -> jwtConfigurer
-                            .decoder(customJwtDecoder)
-                            .jwtAuthenticationConverter(jwtAuthenticationConverter()))
-                    .authenticationEntryPoint(new JwtAuthenticationEntryPoint())
-            ;
+  @Bean
+  public SecurityFilterChain filterChain(HttpSecurity httpSecurity) throws Exception {
+    httpSecurity.oauth2ResourceServer(
+        oauth2 -> {
+          oauth2
+              .jwt(
+                  jwtConfigurer ->
+                      jwtConfigurer
+                          .decoder(customJwtDecoder)
+                          .jwtAuthenticationConverter(jwtAuthenticationConverter()))
+              .authenticationEntryPoint(new JwtAuthenticationEntryPoint());
         });
 
-        httpSecurity.csrf(AbstractHttpConfigurer::disable);
-        httpSecurity.cors(AbstractHttpConfigurer::disable);
-        httpSecurity.sessionManagement(s -> s.sessionCreationPolicy(SessionCreationPolicy.STATELESS));
+    httpSecurity.csrf(AbstractHttpConfigurer::disable);
+    httpSecurity.cors(AbstractHttpConfigurer::disable);
+    httpSecurity.sessionManagement(s -> s.sessionCreationPolicy(SessionCreationPolicy.STATELESS));
 
-        httpSecurity.authorizeHttpRequests(request -> {
-            request.requestMatchers(HttpMethod.POST, "/auth/login").permitAll()
-                    .requestMatchers(HttpMethod.POST, "/auth/user-details-service/login").permitAll()
-                    .anyRequest().authenticated();
+    httpSecurity.authorizeHttpRequests(
+        request -> {
+          request
+              .requestMatchers(HttpMethod.POST, "/auth/login")
+              .permitAll()
+              .requestMatchers(HttpMethod.POST, "/auth/user-details-service/login")
+              .permitAll()
+              .anyRequest()
+              .authenticated();
         });
-        return httpSecurity.userDetailsService(userDetailsService)
-                .httpBasic(Customizer.withDefaults()).build();
-    }
+    return httpSecurity
+        .userDetailsService(userDetailsService)
+        .httpBasic(Customizer.withDefaults())
+        .build();
+  }
 
-    @Bean
-    public JwtAuthenticationConverter jwtAuthenticationConverter() {
-        JwtGrantedAuthoritiesConverter jwtGrantedAuthoritiesConverter = new JwtGrantedAuthoritiesConverter();
-        String authorityPrefix = "";
-        // Optional: set prefix for roles in "scope" payload
-        // prefix = "ROLE" -> ROLE_ADMIN, ROLE_USER
-        jwtGrantedAuthoritiesConverter.setAuthorityPrefix(authorityPrefix);
+  @Bean
+  public JwtAuthenticationConverter jwtAuthenticationConverter() {
+    JwtGrantedAuthoritiesConverter jwtGrantedAuthoritiesConverter =
+        new JwtGrantedAuthoritiesConverter();
+    String authorityPrefix = "";
+    // Optional: set prefix for roles in "scope" payload
+    // prefix = "ROLE" -> ROLE_ADMIN, ROLE_USER
+    jwtGrantedAuthoritiesConverter.setAuthorityPrefix(authorityPrefix);
 
-        JwtAuthenticationConverter jwtAuthenticationConverter = new JwtAuthenticationConverter();
-        jwtAuthenticationConverter.setJwtGrantedAuthoritiesConverter(jwtGrantedAuthoritiesConverter);
-        return jwtAuthenticationConverter;
-    }
+    JwtAuthenticationConverter jwtAuthenticationConverter = new JwtAuthenticationConverter();
+    jwtAuthenticationConverter.setJwtGrantedAuthoritiesConverter(jwtGrantedAuthoritiesConverter);
+    return jwtAuthenticationConverter;
+  }
 
-    @Bean
-    public PasswordEncoder passwordEncoder() {
-        return new BCryptPasswordEncoder(10);
-    }
+  @Bean
+  public PasswordEncoder passwordEncoder() {
+    return new BCryptPasswordEncoder(10);
+  }
 
-    @Bean
-    public AuthenticationManager authenticationManager(UserDetailsServiceImpl userDetailsService, PasswordEncoder passwordEncoder) {
-        var authProvider = new DaoAuthenticationProvider(passwordEncoder);
-        authProvider.setUserDetailsService(userDetailsService);
-        return new ProviderManager(authProvider);
-    }
+  @Bean
+  public AuthenticationManager authenticationManager(
+      UserDetailsServiceImpl userDetailsService, PasswordEncoder passwordEncoder) {
+    var authProvider = new DaoAuthenticationProvider(passwordEncoder);
+    authProvider.setUserDetailsService(userDetailsService);
+    return new ProviderManager(authProvider);
+  }
 }

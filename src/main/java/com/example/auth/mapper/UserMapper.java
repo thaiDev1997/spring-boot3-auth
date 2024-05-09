@@ -6,5 +6,5 @@ import org.mapstruct.Mapper;
 
 @Mapper(componentModel = "spring") // Spring create mapper bean within Bean container
 public interface UserMapper {
-    User toUser(UserCreation userCreation);
+  User toUser(UserCreation userCreation);
 }

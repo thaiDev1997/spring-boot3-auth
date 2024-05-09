@@ -9,8 +9,8 @@ import org.mapstruct.Mapping;
 @Mapper(componentModel = "spring")
 public interface AccountMapper {
 
-    @Mapping(target = "roles", ignore = true)
-    Account toAccount(AccountCreation accountCreation);
+  @Mapping(target = "roles", ignore = true)
+  Account toAccount(AccountCreation accountCreation);
 
-    AccountResponse toAccountResponse(Account account);
+  AccountResponse toAccountResponse(Account account);
 }

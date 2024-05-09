@@ -1,6 +1,7 @@
 package com.example.auth.controller;
 
 import com.example.auth.service.UserService;
+import java.util.Map;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
@@ -12,8 +13,6 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-import java.util.Map;
-
 @Slf4j
 @RestController
 @RequestMapping(value = "/resource")
@@ -21,10 +20,10 @@ import java.util.Map;
 @RequiredArgsConstructor
 public class ResourceController {
 
-    UserService userService;
+  UserService userService;
 
-    @GetMapping(value = "/authentication-info", produces = MediaType.APPLICATION_JSON_VALUE)
-    public Map<String, Object> authenticationInfo(Authentication authentication) {
-        return ((Jwt) authentication.getPrincipal()).getClaims();
-    }
+  @GetMapping(value = "/authentication-info", produces = MediaType.APPLICATION_JSON_VALUE)
+  public Map<String, Object> authenticationInfo(Authentication authentication) {
+    return ((Jwt) authentication.getPrincipal()).getClaims();
+  }
 }

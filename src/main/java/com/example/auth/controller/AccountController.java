@@ -18,11 +18,10 @@ import org.springframework.web.bind.annotation.RestController;
 @RequiredArgsConstructor
 public class AccountController {
 
-    AccountService accountService;
+  AccountService accountService;
 
-    @GetMapping(value = "/my-info", produces = MediaType.APPLICATION_JSON_VALUE)
-    public AccountResponse getMyInfo() {
-        return accountService.getMyInfo();
-    }
-
+  @GetMapping(value = "/my-info", produces = MediaType.APPLICATION_JSON_VALUE)
+  public AccountResponse getMyInfo() {
+    return accountService.getMyInfo();
+  }
 }

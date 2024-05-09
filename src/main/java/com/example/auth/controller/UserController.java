@@ -4,6 +4,7 @@ import com.example.auth.dto.request.UserCreation;
 import com.example.auth.entity.User;
 import com.example.auth.service.UserService;
 import jakarta.validation.Valid;
+import java.util.Collection;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
@@ -18,8 +19,6 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-import java.util.Collection;
-
 @Slf4j
 @RestController
 @RequestMapping(value = "/users")
@@ -27,31 +26,31 @@ import java.util.Collection;
 @RequiredArgsConstructor
 public class UserController {
 
-    UserService userService;
+  UserService userService;
 
-    @GetMapping(produces = MediaType.APPLICATION_JSON_VALUE)
-    public Collection<User> getAllUsers() {
-        return userService.getAll();
-    }
+  @GetMapping(produces = MediaType.APPLICATION_JSON_VALUE)
+  public Collection<User> getAllUsers() {
+    return userService.getAll();
+  }
 
-    @GetMapping(value = "/{code}", produces = MediaType.APPLICATION_JSON_VALUE)
-    public User getUser(@PathVariable(value = "code") String code) {
-        return userService.get(code);
-    }
+  @GetMapping(value = "/{code}", produces = MediaType.APPLICATION_JSON_VALUE)
+  public User getUser(@PathVariable(value = "code") String code) {
+    return userService.get(code);
+  }
 
-    @PostMapping(produces = MediaType.APPLICATION_JSON_VALUE)
-    public User createUser(@RequestBody @Valid UserCreation newUser) {
-        log.info("Controller: create user");
-        return userService.create(newUser);
-    }
+  @PostMapping(produces = MediaType.APPLICATION_JSON_VALUE)
+  public User createUser(@RequestBody @Valid UserCreation newUser) {
+    log.info("Controller: create user");
+    return userService.create(newUser);
+  }
 
-    @PutMapping(produces = MediaType.APPLICATION_JSON_VALUE)
-    public void updateUser(@RequestBody User user) {
-        userService.update(user);
-    }
+  @PutMapping(produces = MediaType.APPLICATION_JSON_VALUE)
+  public void updateUser(@RequestBody User user) {
+    userService.update(user);
+  }
 
-    @DeleteMapping(value = "/{code}")
-    public boolean deleteUser(@PathVariable(value = "code") String code) {
-        return userService.delete(code);
-    }
+  @DeleteMapping(value = "/{code}")
+  public boolean deleteUser(@PathVariable(value = "code") String code) {
+    return userService.delete(code);
+  }
 }

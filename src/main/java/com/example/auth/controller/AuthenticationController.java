@@ -21,28 +21,33 @@ import org.springframework.web.bind.annotation.RestController;
 @RequiredArgsConstructor
 public class AuthenticationController {
 
-    AuthenticationService authenticationService;
+  AuthenticationService authenticationService;
 
-    @PostMapping(value = "/login", consumes = MediaType.APPLICATION_JSON_VALUE)
-    public ApiResponse<String> authenticate(@RequestBody AuthenticationRequest authenticationRequest) {
-        String token = authenticationService.authenticate(authenticationRequest);
-        return ApiResponse.<String>builder().message("Login successfully!").result(token).build();
-    }
+  @PostMapping(value = "/login", consumes = MediaType.APPLICATION_JSON_VALUE)
+  public ApiResponse<String> authenticate(
+      @RequestBody AuthenticationRequest authenticationRequest) {
+    String token = authenticationService.authenticate(authenticationRequest);
+    return ApiResponse.<String>builder().message("Login successfully!").result(token).build();
+  }
 
-    @PostMapping(value = "/user-details-service/login", consumes = MediaType.APPLICATION_JSON_VALUE)
-    public ApiResponse<String> authenticateByUserDetailsService(@RequestBody AuthenticationRequest authenticationRequest) {
-        String token = authenticationService.authenticateByUserDetailsService(authenticationRequest);
-        return ApiResponse.<String>builder().message("Login successfully!").result(token).build();
-    }
+  @PostMapping(value = "/user-details-service/login", consumes = MediaType.APPLICATION_JSON_VALUE)
+  public ApiResponse<String> authenticateByUserDetailsService(
+      @RequestBody AuthenticationRequest authenticationRequest) {
+    String token = authenticationService.authenticateByUserDetailsService(authenticationRequest);
+    return ApiResponse.<String>builder().message("Login successfully!").result(token).build();
+  }
 
-    @DeleteMapping(value = "/logout")
-    public void logout(Authentication authentication) {
-        authenticationService.logout(((Jwt) authentication.getPrincipal()));
-    }
+  @DeleteMapping(value = "/logout")
+  public void logout(Authentication authentication) {
+    authenticationService.logout(((Jwt) authentication.getPrincipal()));
+  }
 
-    @PostMapping(value = "/refresh-token")
-    public ApiResponse<String> refreshToken(Authentication authentication) {
-        String token = authenticationService.refreshToken(((Jwt) authentication.getPrincipal()));
-        return ApiResponse.<String>builder().message("Refresh token successfully!").result(token).build();
-    }
+  @PostMapping(value = "/refresh-token")
+  public ApiResponse<String> refreshToken(Authentication authentication) {
+    String token = authenticationService.refreshToken(((Jwt) authentication.getPrincipal()));
+    return ApiResponse.<String>builder()
+        .message("Refresh token successfully!")
+        .result(token)
+        .build();
+  }
 }

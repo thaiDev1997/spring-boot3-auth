@@ -8,6 +8,8 @@ import com.example.auth.service.AuthenticationService;
 import com.example.auth.service.UserService;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
+import java.time.LocalDate;
+import java.util.UUID;
 import lombok.AccessLevel;
 import lombok.experimental.FieldDefaults;
 import lombok.extern.slf4j.Slf4j;
@@ -27,9 +29,6 @@ import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers;
 
-import java.time.LocalDate;
-import java.util.UUID;
-
 @Slf4j
 @SpringBootTest
 @AutoConfigureMockMvc
@@ -37,87 +36,86 @@ import java.util.UUID;
 @FieldDefaults(level = AccessLevel.PRIVATE)
 public class ResourceControllerTest {
 
-    @Autowired
-    MockMvc mockMvc;
+  @Autowired MockMvc mockMvc;
 
-    @Autowired
-    AuthenticationService authenticationService;
+  @Autowired AuthenticationService authenticationService;
 
-    @MockBean
-    UserService userService;
+  @MockBean UserService userService;
 
-    @MockBean
-    InvalidatedTokenRepository invalidatedTokenRepository;
+  @MockBean InvalidatedTokenRepository invalidatedTokenRepository;
 
-    UserCreation userRequest;
-    User userResponse;
-    String token;
+  UserCreation userRequest;
+  User userResponse;
+  String token;
 
-    @BeforeEach
-    public void init() {
-        var dob = LocalDate.of(1998, 1, 1);
-        var age = LocalDate.now().getYear() - dob.getYear();
-        userRequest = UserCreation.builder()
-                .name("John Doe")
-                .age(age)
-                .dateOfBirth(dob)
-                .build();
-        userResponse = User.builder()
-                .code(UUID.randomUUID().toString())
-                .name(userRequest.getName())
-                .age(age)
-                .dateOfBirth(dob)
-                .build();
-        token = OAuth2AccessToken.TokenType.BEARER.getValue() + " " + authenticationService.generateAdminTokenTestScope();
-    }
+  @BeforeEach
+  public void init() {
+    var dob = LocalDate.of(1998, 1, 1);
+    var age = LocalDate.now().getYear() - dob.getYear();
+    userRequest = UserCreation.builder().name("John Doe").age(age).dateOfBirth(dob).build();
+    userResponse =
+        User.builder()
+            .code(UUID.randomUUID().toString())
+            .name(userRequest.getName())
+            .age(age)
+            .dateOfBirth(dob)
+            .build();
+    token =
+        OAuth2AccessToken.TokenType.BEARER.getValue()
+            + " "
+            + authenticationService.generateAdminTokenTestScope();
+  }
 
-    @Test
-    void createUser_validRequest_success() throws Exception {
-        // GIVEN (preparation)
-        ObjectMapper objectMapper = new ObjectMapper();
-        objectMapper.registerModule(new JavaTimeModule());
-        String content = objectMapper.writeValueAsString(userRequest);
-        // WHEN (execution on preparation)
-        Mockito.when(invalidatedTokenRepository.existsById(Mockito.anyString())).thenReturn(false);
-        Mockito.when(userService.create(ArgumentMatchers.any())).thenReturn(userResponse);
+  @Test
+  void createUser_validRequest_success() throws Exception {
+    // GIVEN (preparation)
+    ObjectMapper objectMapper = new ObjectMapper();
+    objectMapper.registerModule(new JavaTimeModule());
+    String content = objectMapper.writeValueAsString(userRequest);
+    // WHEN (execution on preparation)
+    Mockito.when(invalidatedTokenRepository.existsById(Mockito.anyString())).thenReturn(false);
+    Mockito.when(userService.create(ArgumentMatchers.any())).thenReturn(userResponse);
 
-        mockMvc.perform(MockMvcRequestBuilders
-                        .post("/users")
-                        .contentType(MediaType.APPLICATION_JSON_VALUE)
-                        .header(HttpHeaders.AUTHORIZATION, token)
-                        .content(content))
-                // THEN (expectation after execution)
-                .andExpect(MockMvcResultMatchers.status().isOk())
-                // jsonPath -> result.id or response.data, ...
-                .andExpect(MockMvcResultMatchers.jsonPath("code").exists())
-                .andExpect(MockMvcResultMatchers.jsonPath("code").isString())
-                .andExpect(MockMvcResultMatchers.jsonPath("code").isNotEmpty())
-                .andExpect(MockMvcResultMatchers.jsonPath("code").value(userResponse.getCode()));
-    }
+    mockMvc
+        .perform(
+            MockMvcRequestBuilders.post("/users")
+                .contentType(MediaType.APPLICATION_JSON_VALUE)
+                .header(HttpHeaders.AUTHORIZATION, token)
+                .content(content))
+        // THEN (expectation after execution)
+        .andExpect(MockMvcResultMatchers.status().isOk())
+        // jsonPath -> result.id or response.data, ...
+        .andExpect(MockMvcResultMatchers.jsonPath("code").exists())
+        .andExpect(MockMvcResultMatchers.jsonPath("code").isString())
+        .andExpect(MockMvcResultMatchers.jsonPath("code").isNotEmpty())
+        .andExpect(MockMvcResultMatchers.jsonPath("code").value(userResponse.getCode()));
+  }
 
-    @Test
-    void createUser_invalidName_fail() throws Exception {
-        // GIVEN
-        String invalidName = "joh";
-        userRequest.setName(invalidName);
-        ObjectMapper objectMapper = new ObjectMapper();
-        objectMapper.registerModule(new JavaTimeModule());
-        String content = objectMapper.writeValueAsString(userRequest);
-        // WHEN
-        Mockito.when(invalidatedTokenRepository.existsById(Mockito.anyString())).thenReturn(false);
-        Mockito.when(userService.create(ArgumentMatchers.any())).thenReturn(userResponse);
+  @Test
+  void createUser_invalidName_fail() throws Exception {
+    // GIVEN
+    String invalidName = "joh";
+    userRequest.setName(invalidName);
+    ObjectMapper objectMapper = new ObjectMapper();
+    objectMapper.registerModule(new JavaTimeModule());
+    String content = objectMapper.writeValueAsString(userRequest);
+    // WHEN
+    Mockito.when(invalidatedTokenRepository.existsById(Mockito.anyString())).thenReturn(false);
+    Mockito.when(userService.create(ArgumentMatchers.any())).thenReturn(userResponse);
 
-        mockMvc.perform(MockMvcRequestBuilders
-                        .post("/users")
-                        .contentType(MediaType.APPLICATION_JSON_VALUE)
-                        .header(HttpHeaders.AUTHORIZATION, token)
-                        .content(content))
-                // THEN
-                .andExpect(MockMvcResultMatchers.status().isBadRequest())
-                // jsonPath -> result.id or response.data, ...
-                .andExpect(MockMvcResultMatchers.jsonPath("code").exists())
-                .andExpect(MockMvcResultMatchers.jsonPath("code").isNumber())
-                .andExpect(MockMvcResultMatchers.jsonPath("code").value(ErrorCode.INVALID_REQUEST.getCode()))
-                .andExpect(MockMvcResultMatchers.jsonPath("result.name").value(invalidName));
-    }
+    mockMvc
+        .perform(
+            MockMvcRequestBuilders.post("/users")
+                .contentType(MediaType.APPLICATION_JSON_VALUE)
+                .header(HttpHeaders.AUTHORIZATION, token)
+                .content(content))
+        // THEN
+        .andExpect(MockMvcResultMatchers.status().isBadRequest())
+        // jsonPath -> result.id or response.data, ...
+        .andExpect(MockMvcResultMatchers.jsonPath("code").exists())
+        .andExpect(MockMvcResultMatchers.jsonPath("code").isNumber())
+        .andExpect(
+            MockMvcResultMatchers.jsonPath("code").value(ErrorCode.INVALID_REQUEST.getCode()))
+        .andExpect(MockMvcResultMatchers.jsonPath("result.name").value(invalidName));
+  }
 }
